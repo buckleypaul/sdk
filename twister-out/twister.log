@@ -1,0 +1,6 @@
+2025-11-09 07:55:23,655 - twister - INFO - Using Ninja..
+2025-11-09 07:55:23,825 - twister - INFO - Zephyr version: v4.2.0
+2025-11-09 07:55:23,842 - twister - DEBUG - Running cmake script /Users/paulbuckley/projects/buckleypaul-public-sdk/zephyr/cmake/verify-toolchain.cmake
+2025-11-09 07:55:23,842 - twister - DEBUG - Calling cmake: /opt/homebrew/bin/cmake -DFORMAT=json -P /Users/paulbuckley/projects/buckleypaul-public-sdk/zephyr/cmake/verify-toolchain.cmake
+2025-11-09 07:55:24,292 - twister - DEBUG - Finished running /Users/paulbuckley/projects/buckleypaul-public-sdk/zephyr/cmake/verify-toolchain.cmake
+2025-11-09 07:55:24,292 - twister - INFO - Using 'zephyr' toolchain.

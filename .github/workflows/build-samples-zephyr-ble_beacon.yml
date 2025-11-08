@@ -1,0 +1,41 @@
+name: Build Zephyr BLE Beacon
+
+on:
+  pull_request:
+    branches: [ "**" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+      # If west.yml is at repo root (it is, in HubbleNetwork/sdk), a normal checkout is fine.
+      # If you ever move west.yml to a subdir, switch to a path checkout and set app-path accordingly below.
+      #   with: { path: app } and update app-path: app
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Setup Zephyr project (SDK + modules)
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          # west.yml lives at the repo root
+          app-path: .
+          # We only need the ARM toolchain for nRF52. (nrf52_bsim uses host toolchain.)
+          toolchains: arm-zephyr-eabi
+
+      - name: Build BLE Beacon
+        run: |
+          set -euxo pipefail
+          # Build all Zephyr projects in samples/zephyr directory
+          west twister -T samples/zephyr --build-only

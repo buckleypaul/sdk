@@ -1,0 +1,131 @@
+name: Twister • tests/zephyr/ble-network (nrf52_bsim)
+
+# trigger on PRs touching the test tree, and allow manual runs
+on:
+  pull_request:
+    branches: [ "**" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  twister-bsim:
+    runs-on: ubuntu-24.04
+    # large timeout because building bsim + tests can take a while
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Zephyr Python requirements
+        # twister and some Zephyr helpers require a few pip packages
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f zephyr/scripts/requirements.txt ]; then
+            python -m pip install -r zephyr/scripts/requirements.txt
+          fi
+
+      - name: Setup Zephyr project (west & toolchains)
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: .
+          toolchains: arm-zephyr-eabi
+
+      - name: Ensure ZEPHYR_BASE is exported for later steps
+        run: |
+          set -euxo pipefail
+
+          # Ensure the west export exists (this will create zephyr/zephyr-env.sh)
+          west zephyr-export
+
+          # If ZEPHYR_BASE is not already set, try to source the exported env script
+          # If ZEPHYR_BASE is not already set, try to source the exported env script
+          if [ -z "${ZEPHYR_BASE:-}" ]; then
+            if command -v west >/dev/null 2>&1; then
+              topdir="$(west topdir 2>/dev/null)"
+              if [ -n "$topdir" ] && [ -f "$topdir/zephyr/zephyr-env.sh" ]; then
+                # shellcheck disable=SC1091
+                . "$topdir/zephyr/zephyr-env.sh"
+              fi
+            fi
+          fi
+
+          # As a last-resort fallback, assume zephyr lives at repo-root/zephyr
+          if [ -z "${ZEPHYR_BASE:-}" ]; then
+            echo "ZEPHYR_BASE still empty; setting default to \$GITHUB_WORKSPACE/zephyr"
+            echo "ZEPHYR_BASE=${GITHUB_WORKSPACE}/zephyr" >> $GITHUB_ENV
+          else
+            # Persist whatever ZEPHYR_BASE we now have to future steps
+            echo "ZEPHYR_BASE=${ZEPHYR_BASE}" >> $GITHUB_ENV
+          fi
+
+      - name: Ensure Zephyr workspace export
+        run: |
+          # make sure west/zephyr info is exported to environment
+          west zephyr-export
+
+      - name: Enable BabbleSim in manifest and fetch
+        run: |
+          set -euxo pipefail
+          # Enable bsim group and fetch everything the manifest references
+          west config manifest.group-filter -- +babblesim
+          west update
+
+      - name: Build BabbleSim components
+        run: |
+          set -euxo pipefail
+          # the zephyr checkout sets ZEPHYR_BASE; build bsim from the tools dir
+          BSIM_ROOT="${ZEPHYR_BASE}/../tools/bsim"
+          echo "Building BabbleSim at ${BSIM_ROOT}"
+          cd "${BSIM_ROOT}"
+          make everything -j"$(nproc)"
+
+      - name: Export BabbleSim env for Twister
+        run: |
+          # Twister/FindBabbleSim expects BSIM_OUT_PATH & BSIM_COMPONENTS_PATH
+          echo "BSIM_OUT_PATH=${ZEPHYR_BASE}/../tools/bsim" >> $GITHUB_ENV
+          echo "BSIM_COMPONENTS_PATH=${ZEPHYR_BASE}/../tools/bsim/components" >> $GITHUB_ENV
+          # sanity print
+          echo "BSIM_OUT_PATH=${ZEPHYR_BASE}/../tools/bsim"
+          echo "BSIM_COMPONENTS_PATH=${ZEPHYR_BASE}/../tools/bsim/components"
+
+      - name: Run Twister for ble-network tests (nrf52_bsim)
+        # Twister will create twister-out/ with reports (testplan.json, twister.json, xunit etc)
+        run: |
+          set -euxo pipefail
+          # list the tests first (useful for debugging)
+          ${ZEPHYR_BASE}/scripts/twister --list-tests -T tests/zephyr/ble-network -p nrf52_bsim -v || true
+          # run Twister (increase -j if you want parallel build jobs)
+          ${ZEPHYR_BASE}/scripts/twister -T tests/zephyr/ble-network -p nrf52_bsim -v
+
+      - name: Show quick twister summary (testplan.json)
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          p=pathlib.Path("twister-out/testplan.json")
+          if p.exists():
+              j=json.loads(p.read_text())
+              for s in j.get("testsuites", []):
+                  print(s.get("name"), "=>", s.get("status"), "filter:", s.get("filter",""))
+              print("\nSummary files written to twister-out/")
+          else:
+              print("twister-out/testplan.json not found")
+              sys.exit(0)
+          PY
+
+      - name: Upload Twister outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twister-ble-network-${{ github.run_id }}
+          path: twister-out/**
+          if-no-files-found: ignore
