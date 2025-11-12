@@ -35,17 +35,21 @@ extern "C" {
  * Calling this function is essential before using @ref hubble_ble_advertise_get
  *
  * @code
- * uint64_t current_utc_time = 1633072800000; // Example UTC time in milliseconds
- * int ret = hubble_ble_init(current_utc_time);
+ * uint64_t current_utc_time = 1633072800000; // Example UTC time in
+ * milliseconds static uint8_t master_key[CONFIG_HUBBLE_KEY_SIZE] = {...}; int
+ * ret = hubble_ble_init(current_utc_time, master_key);
  * @endcode
  *
- * @param utc_time The UTC time in milliseconds since the Unix epoch (January 1, 1970).
+ * @param utc_time The UTC time in milliseconds since the Unix epoch (January 1,
+ * 1970). Set to 0 to set later via hubble_ble_utc_set
+ * @param key An opaque pointer to the key. If NULL, must be set with
+ * hubble_ble_key_set before getting advertisements.
  *
  * @return
  *          - 0 on success.
  *          - Non-zero on failure.
  */
-int hubble_ble_init(uint64_t utc_time);
+int hubble_ble_init(uint64_t utc_time, const void *key);
 
 /**
  * @brief Retrieves advertisements from the provided data.
