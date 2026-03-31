@@ -8,14 +8,14 @@
 #define INCLUDE_PORT_FREERTOS_CONFIG_H
 
 /*
- * Enable the Hubble BLE and Satellite network modules.
+ * Enable the Hubble BLE network module.
  */
 #ifndef CONFIG_HUBBLE_BLE_NETWORK
 #define CONFIG_HUBBLE_BLE_NETWORK 1
 #endif
 
 #ifndef CONFIG_HUBBLE_SAT_NETWORK
-#define CONFIG_HUBBLE_SAT_NETWORK 1
+#define CONFIG_HUBBLE_SAT_NETWORK 0
 #endif
 
 /*
