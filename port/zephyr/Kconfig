@@ -45,7 +45,7 @@ config HUBBLE_EID_POOL_SIZE
 	    256:  ~256 days of unique EIDs
 	    2048: ~5.6 years of unique EIDs
 
-config HUBBLE_SAT_NETWORK
+menuconfig HUBBLE_SAT_NETWORK
 	   bool "Hubble Satellite Network Library [EXPERIMENTAL]"
 	   select EXPERIMENTAL
 	   select ENTROPY_GENERATOR
@@ -90,6 +90,7 @@ if HUBBLE_BLE_NETWORK || HUBBLE_SAT_NETWORK
 
 choice
 	prompt "Hubble Network key size"
+	default HUBBLE_NETWORK_KEY_128
 
 config HUBBLE_NETWORK_KEY_256
 	   bool "Use 256 bits key size"

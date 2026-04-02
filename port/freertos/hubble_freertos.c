@@ -62,6 +62,12 @@ uint64_t hubble_uptime_get(void)
 }
 #endif /* CONFIG_HUBBLE_UPTIME_CUSTOM */
 
+/*
+ * Default weak implementation using stdlib rand(). Applications should
+ * override this with a platform-specific RNG for better entropy.
+ * While the SDK does not require a CSPRNG, rand() has poor randomness
+ * on most platforms and may not be seeded.
+ */
 HUBBLE_WEAK int hubble_rand_get(uint8_t *buffer, size_t len)
 {
 	int random;

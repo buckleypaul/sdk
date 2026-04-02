@@ -34,6 +34,23 @@
 /* #define CONFIG_HUBBLE_NETWORK_CRYPTO_PSA 1 */
 
 /*
+ * Enforce nonce uniqueness check in cryptography operations.
+ * Ensures that nonce parameters are not re-used to encrypt different
+ * messages. Re-using the same nonce has severe security implications.
+ * Default: enabled (matching Kconfig ports).
+ */
+#ifndef CONFIG_HUBBLE_NETWORK_SECURITY_ENFORCE_NONCE_CHECK
+#define CONFIG_HUBBLE_NETWORK_SECURITY_ENFORCE_NONCE_CHECK 1
+#endif
+
+/*
+ * Application defined sequence counter.
+ * Define this to override the default hubble_sequence_counter_get()
+ * function with a custom implementation.
+ */
+/* #define CONFIG_HUBBLE_NETWORK_SEQUENCE_NONCE_CUSTOM 1 */
+
+/*
  * EID Generation Mode
  *
  * Unix Time-based mode is used by default. To use counter-based mode instead,
@@ -44,6 +61,12 @@
 #if defined(CONFIG_HUBBLE_EID_TIME_BASED) &&                                   \
 	defined(CONFIG_HUBBLE_EID_COUNTER_BASED)
 #error "Cannot define both CONFIG_HUBBLE_EID_TIME_BASED and CONFIG_HUBBLE_EID_COUNTER_BASED"
+#endif
+
+#ifndef CONFIG_HUBBLE_EID_COUNTER_BASED
+#ifndef CONFIG_HUBBLE_EID_TIME_BASED
+#define CONFIG_HUBBLE_EID_TIME_BASED 1
+#endif
 #endif
 
 /*

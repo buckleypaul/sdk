@@ -79,8 +79,11 @@ menuconfig HUBBLE_BLE_NETWORK
 	   help
 		Enable library for communication with Hubble BLE network
 
+if HUBBLE_BLE_NETWORK || HUBBLE_SAT_NETWORK
+
 choice
 	prompt "Hubble Network key size"
+	default HUBBLE_NETWORK_KEY_128
 
 config HUBBLE_NETWORK_KEY_256
 	   bool "Use 256 bits key size"
@@ -114,3 +117,14 @@ config HUBBLE_NETWORK_SEQUENCE_NONCE_CUSTOM
 		This option allows applications to override the default
 		function that returns a sequence number to be used to
 		encrypt messages.
+
+config HUBBLE_UPTIME_CUSTOM
+	   bool "Application defined uptime implementation"
+	   help
+		This option allows applications to override the default
+		function that returns the system uptime in milliseconds.
+		This is primarily useful for unit testing where controlled
+		time values are needed to verify time-dependent behavior.
+		Implement hubble_uptime_get to override.
+
+endif

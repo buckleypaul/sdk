@@ -34,7 +34,7 @@ enum hubble_log_level {
 #define HUBBLE_LOG_WARNING(...) HUBBLE_LOG(HUBBLE_LOG_WARNING, __VA_ARGS__)
 #define HUBBLE_LOG_ERROR(...)   HUBBLE_LOG(HUBBLE_LOG_ERROR, __VA_ARGS__)
 #else
-/* When the log level in Zephyr is set to OFF, don't include log statements for code size */
+/* When logging is disabled, don't include log statements for code size */
 #define HUBBLE_LOG_DEBUG(...)
 #define HUBBLE_LOG_INFO(...)
 #define HUBBLE_LOG_WARNING(...)

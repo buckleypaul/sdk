@@ -1,5 +1,7 @@
 set(SDK_BASE_DIR ../../../)
 
+# ESP-IDF port reuses the FreeRTOS port for uptime (hubble_uptime_get)
+# and weak default implementations (hubble_rand_get, hubble_log).
 set(SRCS
     "${SDK_BASE_DIR}/port/esp-idf/hubble_esp_idf.c"
     "${SDK_BASE_DIR}/port/freertos/hubble_freertos.c"
