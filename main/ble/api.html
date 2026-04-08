@@ -336,28 +336,28 @@ hubble_ble_advertise_get(data, my_data_len, buf, &amp;buf_len);
 <span id="_CPPv311hubble_init8uint64_tPKv"></span><span id="_CPPv211hubble_init8uint64_tPKv"></span><span id="hubble_init__uint64_t.voidCP"></span><span class="target" id="group__hubble__api_1ga03991712b4f80ded966f4f58e3e8813c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hubble_init</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">initial_time</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">key</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411hubble_init8uint64_tPKv" title="Link to this definition"></a><br /></dt>
 <dd><p>Initializes the Hubble SDK. </p>
 <p>Calling this function is essential before using any other SDK APIs.</p>
-<p>The interpretation of the <code class="docutils literal notranslate"><span class="pre">initial_time</span></code> parameter depends on the configured EID generation mode:</p>
-<p><strong>Unix Time-based mode (CONFIG_HUBBLE_EID_TIME_BASED):</strong><ul class="simple">
+<p>The interpretation of the <code class="docutils literal notranslate"><span class="pre">initial_time</span></code> parameter depends on the configured counter source:</p>
+<p><strong>Unix time mode (CONFIG_HUBBLE_COUNTER_SOURCE_UNIX_TIME):</strong><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">initial_time</span></code> is the time in milliseconds since Unix epoch</p></li>
 <li><p>Value of 0 is invalid and will return an error</p></li>
 <li><p>Time can be updated later via <a class="reference internal" href="#group__hubble__api_1ga0da1af458a60c0ae827382536b65db08"><span class="std std-ref">hubble_time_set()</span></a></p></li>
 </ul>
 </p>
-<p><strong>Counter-based mode (CONFIG_HUBBLE_EID_COUNTER_BASED):</strong><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">initial_time</span></code> is the initial EID counter value</p></li>
+<p><strong>Device uptime mode (CONFIG_HUBBLE_COUNTER_SOURCE_DEVICE_UPTIME):</strong><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">initial_time</span></code> is the initial counter value</p></li>
 <li><p>Value of 0 starts the counter at epoch 0 (valid)</p></li>
 <li><p>The counter increments based on uptime from this initial value</p></li>
 <li><p>Useful for resuming from a known state after reboot</p></li>
 </ul>
 </p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>// Unix Time-based mode example
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>// Unix time mode example
 uint64_t unix_time_ms = 1705881600000; // Current Unix Epoch time
 int ret = hubble_init(unix_time_ms, master_key);
 
-// Counter-based mode example (start at 0)
+// Device uptime mode example (start at 0)
 int ret = hubble_init(0, master_key);
 
-// Counter-based mode example (resume from saved counter)
+// Device uptime mode example (resume from saved counter)
 uint64_t saved_counter = load_from_flash();
 int ret = hubble_init(saved_counter, master_key);
 </pre></div>
@@ -365,7 +365,7 @@ int ret = hubble_init(saved_counter, master_key);
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_time</strong> – For Unix Time mode: Unix time in milliseconds since epoch. For Counter mode: Initial counter value (0 = start at 0). </p></li>
+<li><p><strong>initial_time</strong> – For Unix time mode: Unix time in milliseconds since epoch. For device uptime mode: Initial counter value (0 = start at 0). </p></li>
 <li><p><strong>key</strong> – An opaque pointer to the master key buffer. The SDK stores this pointer directly and does not copy the key data. The caller must ensure the buffer remains valid for the lifetime of SDK usage (do not use stack or temporary buffers). The key size must match CONFIG_HUBBLE_KEY_SIZE. If NULL, must be set with hubble_key_set before getting advertisements.</p></li>
 </ul>
 </dd>
@@ -432,12 +432,12 @@ int ret = hubble_init(saved_counter, master_key);
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv422hubble_eid_counter_getP8uint32_t">
-<span id="_CPPv322hubble_eid_counter_getP8uint32_t"></span><span id="_CPPv222hubble_eid_counter_getP8uint32_t"></span><span id="hubble_eid_counter_get__uint32_tP"></span><span class="target" id="group__hubble__api_1gac8ed65204a6999d69fa7f3bcee6ec460"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hubble_eid_counter_get</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">counter</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422hubble_eid_counter_getP8uint32_t" title="Link to this definition"></a><br /></dt>
-<dd><p>Get the current time counter value for EID derivation. </p>
-<p>Returns the time counter based on the configured EID generation mode:<ul class="simple">
-<li><p>Counter-based: Uses uptime-derived counter with initial offset, wrapping at HUBBLE_EID_POOL_SIZE (128) to produce values in [0, pool_size-1]</p></li>
-<li><p>Unix Time-based: Uses Unix time divided by rotation period (no wrapping)</p></li>
+<dt class="sig sig-object cpp" id="_CPPv418hubble_counter_getP8uint32_t">
+<span id="_CPPv318hubble_counter_getP8uint32_t"></span><span id="_CPPv218hubble_counter_getP8uint32_t"></span><span id="hubble_counter_get__uint32_tP"></span><span class="target" id="group__hubble__api_1ga24bdc845c6f152280edc575816ee3adf"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hubble_counter_get</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">counter</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418hubble_counter_getP8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd><p>Get the current time counter value. </p>
+<p>Returns the time counter based on the configured counter source:<ul class="simple">
+<li><p>Device uptime: Uses uptime-derived counter with initial offset, wrapping at HUBBLE_EID_POOL_SIZE (128) to produce values in [0, pool_size-1]</p></li>
+<li><p>Unix time: Uses Unix time divided by rotation period (no wrapping)</p></li>
 </ul>
 </p>
 <dl class="field-list simple">

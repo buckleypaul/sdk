@@ -230,14 +230,14 @@ platform.</p>
 platforms, define the equivalent <code class="docutils literal notranslate"><span class="pre">CONFIG_</span></code> macros in your build system or
 project header.</p>
 <div class="kconfig-choice docutils container">
-<p class="rubric">EID generation mode</p>
+<p class="rubric">Counter source</p>
 <p><em>Choice — select one of:</em></p>
 <dl class="kconfig-options">
-<dt><span class="target" id="config-hubble-eid-time-based"></span><strong>CONFIG_HUBBLE_EID_TIME_BASED</strong><span> </span><em>[default]</em></dt><dd><p><span>Unix Time-based EID generation</span></p>
-<p>EID derived from Unix time. Requires time provisioning.</p>
+<dt><span class="target" id="config-hubble-counter-source-unix-time"></span><strong>CONFIG_HUBBLE_COUNTER_SOURCE_UNIX_TIME</strong><span> </span><em>[default]</em></dt><dd><p><span>Unix time counter source</span></p>
+<p>Counter derived from Unix time. Requires time provisioning.</p>
 </dd>
-<dt><span class="target" id="config-hubble-eid-counter-based"></span><strong>CONFIG_HUBBLE_EID_COUNTER_BASED</strong></dt><dd><p><span>Counter-based EID generation</span></p>
-<p>EID derived from internal counter. No Unix time required.
+<dt><span class="target" id="config-hubble-counter-source-device-uptime"></span><strong>CONFIG_HUBBLE_COUNTER_SOURCE_DEVICE_UPTIME</strong></dt><dd><p><span>Device uptime counter source</span></p>
+<p>Counter derived from device uptime. No Unix time required.
 Initial counter value provided via hubble_init().</p>
 </dd>
 </dl>
