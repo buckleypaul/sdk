@@ -135,6 +135,59 @@ ZTEST(satellite_ephemeris_test, test_satellite_ephemeris_calculation)
 	}
 }
 
+/*
+ * Independent-reference check: predicted culmination vs canonical SGP4 truth.
+ *
+ * test_satellite_ephemeris_calculation asserts against values captured from
+ * this propagator's own output and re-baselined on every change, so it proves
+ * the predictor is stable, not correct. The values below are instead the true
+ * time of maximum elevation of NORAD 60471 from an independent SGP4 oracle
+ * propagating the same orbital elements (start_time = query time).
+ *
+ * They expose a real defect: the fixture supplies n0 as the TLE/Kozai mean
+ * motion, but the SDK consumes it as a *nodal* mean motion (_orbit_count_get:
+ * count = n0 * dt). J2 separates the two by ~3.6 s/orbit (~55 s/day), so the
+ * predicted culmination drifts out of the +-80 s transmission window within
+ * ~2 days and the device transmits outside the real pass.
+ *
+ * EXPECTED TO FAIL until n0 is converted to the nodal mean motion
+ * 2*pi/(mdot + argpdot) during parameter derivation; the fix collapses the
+ * drift to a few seconds and flips this test green.
+ */
+static const struct test_result sgp4_truth[] = {
+	{{47.0, -122.0}, 1711319637, 1711321451}, /* day 0.3: drifts  -14 s */
+	{{47.0, -122.0}, 1711405072, 1711406941}, /* day 1.3: drifts  -69 s */
+	{{47.0, -122.0}, 1711490503, 1711492429}, /* day 2.3: drifts -126 s */
+	{{47.0, -122.0}, 1711614459, 1711616473}, /* day 3.7: drifts -214 s */
+};
+
+ZTEST_EXPECT_FAIL(satellite_ephemeris_test, test_satellite_ephemeris_vs_sgp4);
+ZTEST(satellite_ephemeris_test, test_satellite_ephemeris_vs_sgp4)
+{
+	int ret = hubble_sat_satellites_set(&orbit, 1);
+
+	zassert_equal(ret, 0, NULL);
+
+	for (size_t i = 0; i < ARRAY_SIZE(sgp4_truth); i++) {
+		struct hubble_sat_pass_info next_pass;
+
+		ret = hubble_next_pass_get(sgp4_truth[i].start_time,
+					   &sgp4_truth[i].pos, &next_pass);
+		zassert_equal(ret, 0, NULL);
+
+		/* Culmination must land within the transmission window of the
+		 * true pass, else the device transmits outside it.
+		 */
+		zassert_within(next_pass.culmination,
+			       sgp4_truth[i].culmination_time,
+			       TRANSMISSION_PERIOD_SINGLE_PACKET / 2U,
+			       "pass %u culmination off by %lld s (window +-80 s)",
+			       (unsigned int)i,
+			       (long long)next_pass.culmination -
+				       (long long)sgp4_truth[i].culmination_time);
+	}
+}
+
 ZTEST(satellite_ephemeris_test, test_satellite_ephemeris_invalid)
 {
 	struct hubble_sat_pass_info next_pass;
