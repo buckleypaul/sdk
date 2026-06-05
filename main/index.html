@@ -72,9 +72,17 @@
     
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction/index.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction/index.html#architecture">Architecture</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="introduction/index.html#service-modules">Service Modules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="introduction/index.html#port-layer">Port Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction/index.html#where-to-go-next">Where to go next</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/index.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture/index.html#service-modules">Service Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="architecture/index.html#satellite-module">Satellite Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="architecture/index.html#ble-network-module">BLE Network Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/index.html#port-layer">Port Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="architecture/project-organization.html">Project Organization</a></li>
 </ul>
 </li>
 </ul>
@@ -94,8 +102,15 @@
 <li class="toctree-l3"><a class="reference internal" href="quickstart/ti/index.html#prerequisites">Prerequisites</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quickstart/ti/index.html#adding-the-hubble-network-sdk-sysconfig-product">Adding the Hubble Network SDK SysConfig Product</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quickstart/ti/index.html#configuring-the-hubble-module-in-a-syscfg-script">Configuring the Hubble Module in a <code class="docutils literal notranslate"><span class="pre">.syscfg</span></code> Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart/ti/index.html#configuring-the-radio-for-satellite">Configuring the Radio for Satellite</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quickstart/ti/index.html#using-code-composer-studio-ccs">Using Code Composer Studio (CCS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quickstart/ti/index.html#building-the-application">Building the Application</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart/esp-idf/index.html">ESP-IDF Quick Start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart/esp-idf/index.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart/esp-idf/index.html#adding-hubble-network-to-an-esp-idf-project">Adding Hubble Network to an ESP-IDF Project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart/esp-idf/index.html#satellite-network-on-esp32-c6-required-phy-blob">Satellite Network on ESP32-C6: Required PHY Blob</a></li>
 </ul>
 </li>
 </ul>
@@ -263,6 +278,10 @@ libraries that make it easy to interact with all of Hubble’s services.</p>
 <td><p><a class="reference internal" href="quickstart/ti/index.html#ti-quick-start"><span class="std std-ref">TI SDK Quick Start (SysConfig)</span></a></p></td>
 <td><p>TI SimpleLink SDK + SysConfig integration.</p></td>
 </tr>
+<tr class="row-odd"><td><p>ESP-IDF</p></td>
+<td><p><a class="reference internal" href="quickstart/esp-idf/index.html#esp-idf-quick-start"><span class="std std-ref">ESP-IDF Quick Start</span></a></p></td>
+<td><p>ESP-IDF support with component-based integration.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -274,7 +293,7 @@ libraries that make it easy to interact with all of Hubble’s services.</p>
             <span class="grid-icon fa fa-info"></span>
             <h2>About Hubble Network SDK</h2>
         </a>
-        <p>Architecture, features &amp; how-to-use</p>
+        <p>Overview, features &amp; where to start</p>
     </li>
     <li class="grid-item">
         <a href="configuration/index.html">
@@ -282,6 +301,13 @@ libraries that make it easy to interact with all of Hubble’s services.</p>
             <h2>Configuration Reference</h2>
         </a>
         <p>Kconfig options for BLE, satellite, crypto &amp; more</p>
+    </li>
+    <li class="grid-item">
+        <a href="architecture/index.html">
+            <span class="grid-icon fa fa-sitemap"></span>
+            <h2>Architecture</h2>
+        </a>
+        <p>Service modules, port layer, code organization &amp; conventions</p>
     </li>
     <li class="grid-item">
         <a href="ble/index.html">
