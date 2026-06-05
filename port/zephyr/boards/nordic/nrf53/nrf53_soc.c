@@ -23,14 +23,23 @@
 
 #include <errno.h>
 
-#define RADIO_NODE                 DT_NODELABEL(radio)
+#define RADIO_NODE          DT_NODELABEL(radio)
 
 /**
  * Time between TXEN task and READY event with fast ramp-up enabled is
  * 40us. nRF5340_PS_v1.6 - 7.26.16.8
  */
-#define WAIT_SYMBOL_OFF_US         (HUBBLE_WAIT_SYMBOL_OFF_US - 40)
-#define WAIT_SYMBOL_US             (HUBBLE_WAIT_SYMBOL_US + 40)
+#define WAIT_SYMBOL_OFF_US  (HUBBLE_WAIT_SYMBOL_OFF_US - 40)
+#define WAIT_SYMBOL_US      (HUBBLE_WAIT_SYMBOL_US + 40)
+
+/*
+ * Upper bound on how long to wait for each per-symbol DISABLED interrupt.
+ * The timer auto-clears on COMPARE1, so a healthy symbol fires every
+ * WAIT_SYMBOL_OFF_US + WAIT_SYMBOL_US (~8.8 ms). A generous multiple only
+ * ever fires on a genuinely missed/absent radio interrupt, so erring large
+ * is correct.
+ */
+#define SYMBOL_WAIT_TIMEOUT K_USEC((WAIT_SYMBOL_OFF_US + WAIT_SYMBOL_US) * 3)
 
 #define RADIO_ENABLE_TX_ON_CC0_PPI 9U
 #define RADIO_DISABLE_ON_CC1_PPI   12U
@@ -179,7 +188,15 @@ int hubble_sat_soc_enable(void)
 	nrf_radio_shorts_enable(NRF_RADIO, NRF_RADIO_SHORT_READY_START_MASK);
 	nrf_radio_int_enable(NRF_RADIO, NRF_RADIO_INT_DISABLED_MASK);
 
-	(void)hubble_nrf_lib_enable();
+	ret = hubble_nrf_lib_enable();
+	if (ret != 0) {
+		/*
+		 * The blob is closed-source and its error semantics are
+		 * undocumented; treat any non-zero status as an enable
+		 * failure. The exact mapping needs on-hardware validation.
+		 */
+		return -EIO;
+	}
 
 	_timer_setup();
 	_dppi_setup();
@@ -204,6 +221,7 @@ int hubble_sat_soc_enable(void)
 int hubble_sat_soc_packet_send(const struct hubble_sat_packet_frames *packet)
 {
 	int8_t frame = -1;
+	int ret = 0;
 
 	k_sem_take(&_transmit_sem, K_FOREVER);
 	k_sem_reset(&_symbol_sem);
@@ -218,15 +236,32 @@ int hubble_sat_soc_packet_send(const struct hubble_sat_packet_frames *packet)
 			frame++;
 		}
 
-		hubble_nrf_lib_frequency_set(packet->frame[frame].channel,
-					     packet->frame[frame].data[data_pos]);
-		k_sem_take(&_symbol_sem, K_FOREVER);
+		ret = hubble_nrf_lib_frequency_set(
+			packet->frame[frame].channel,
+			packet->frame[frame].data[data_pos]);
+		if (ret != 0) {
+			/* Closed blob: normalize any non-zero status to a
+			 * generic transmit failure. */
+			ret = -EIO;
+			goto cleanup;
+		}
+
+		/*
+		 * Bound the wait so a missed radio DISABLED interrupt fails the
+		 * transmit instead of hanging forever (k_sem_take returns
+		 * -EAGAIN on timeout).
+		 */
+		ret = k_sem_take(&_symbol_sem, SYMBOL_WAIT_TIMEOUT);
+		if (ret != 0) {
+			goto cleanup;
+		}
 	}
 
+cleanup:
 	_dppi_disable();
 	_timer_disable();
 
 	k_sem_give(&_transmit_sem);
 
-	return 0;
+	return ret;
 }

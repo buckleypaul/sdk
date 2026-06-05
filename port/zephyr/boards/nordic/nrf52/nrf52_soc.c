@@ -18,11 +18,20 @@
 #include <stdint.h>
 #include <errno.h>
 
-#define RADIO_NODE         DT_NODELABEL(radio)
+#define RADIO_NODE          DT_NODELABEL(radio)
 
 /* From NRF52840_PS_v1.2 6.20.15.8 Time between TXEN -> READ is 140us */
-#define WAIT_SYMBOL_OFF_US (HUBBLE_WAIT_SYMBOL_OFF_US - 140)
-#define WAIT_SYMBOL_US     (HUBBLE_WAIT_SYMBOL_US + 140)
+#define WAIT_SYMBOL_OFF_US  (HUBBLE_WAIT_SYMBOL_OFF_US - 140)
+#define WAIT_SYMBOL_US      (HUBBLE_WAIT_SYMBOL_US + 140)
+
+/*
+ * Upper bound on how long to wait for each per-symbol DISABLED interrupt.
+ * The timer auto-clears on COMPARE1, so a healthy symbol fires every
+ * WAIT_SYMBOL_OFF_US + WAIT_SYMBOL_US (~8.8 ms). A generous multiple only
+ * ever fires on a genuinely missed/absent radio interrupt, so erring large
+ * is correct.
+ */
+#define SYMBOL_WAIT_TIMEOUT K_USEC((WAIT_SYMBOL_OFF_US + WAIT_SYMBOL_US) * 3)
 
 static uint32_t _radio_shorts;
 
@@ -116,7 +125,15 @@ int hubble_sat_soc_enable(void)
 		return ret;
 	}
 
-	(void)hubble_nrf_lib_enable();
+	ret = hubble_nrf_lib_enable();
+	if (ret != 0) {
+		/*
+		 * The blob is closed-source and its error semantics are
+		 * undocumented; treat any non-zero status as an enable
+		 * failure. The exact mapping needs on-hardware validation.
+		 */
+		return -EIO;
+	}
 
 	_radio_shorts = nrf_radio_shorts_get(NRF_RADIO);
 	nrf_radio_shorts_disable(NRF_RADIO, ~0);
@@ -146,6 +163,14 @@ int hubble_sat_soc_disable(void)
 {
 	(void)hubble_nrf_lib_disable();
 
+	/*
+	 * Clear the radio interrupt source enabled in hubble_sat_soc_enable().
+	 * The RADIO IRQ and PPI channels are shared with the Zephyr BLE
+	 * controller, so a stale enabled source can latch a pending IRQ after
+	 * we hand the radio back. Matches nrf53/nrf54.
+	 */
+	nrf_radio_int_disable(NRF_RADIO, ~0);
+
 	irq_disable(DT_IRQN(RADIO_NODE));
 
 #if defined(CONFIG_DYNAMIC_INTERRUPTS) && defined(CONFIG_SHARED_INTERRUPTS)
@@ -161,6 +186,7 @@ int hubble_sat_soc_disable(void)
 int hubble_sat_soc_packet_send(const struct hubble_sat_packet_frames *packet)
 {
 	int8_t frame = -1;
+	int ret = 0;
 
 	k_sem_take(&_transmit_sem, K_FOREVER);
 
@@ -176,15 +202,32 @@ int hubble_sat_soc_packet_send(const struct hubble_sat_packet_frames *packet)
 			frame++;
 		}
 
-		hubble_nrf_lib_frequency_set(packet->frame[frame].channel,
-					     packet->frame[frame].data[data_pos]);
-		k_sem_take(&_symbol_sem, K_FOREVER);
+		ret = hubble_nrf_lib_frequency_set(
+			packet->frame[frame].channel,
+			packet->frame[frame].data[data_pos]);
+		if (ret != 0) {
+			/* Closed blob: normalize any non-zero status to a
+			 * generic transmit failure. */
+			ret = -EIO;
+			goto cleanup;
+		}
+
+		/*
+		 * Bound the wait so a missed radio DISABLED interrupt fails the
+		 * transmit instead of hanging forever (k_sem_take returns
+		 * -EAGAIN on timeout).
+		 */
+		ret = k_sem_take(&_symbol_sem, SYMBOL_WAIT_TIMEOUT);
+		if (ret != 0) {
+			goto cleanup;
+		}
 	}
 
+cleanup:
 	_ppi_disable();
 	_timer_disable();
 
 	k_sem_give(&_transmit_sem);
 
-	return 0;
+	return ret;
 }

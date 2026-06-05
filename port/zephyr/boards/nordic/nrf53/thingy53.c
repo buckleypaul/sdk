@@ -45,9 +45,12 @@ int hubble_sat_board_disable(void)
 
 int hubble_sat_board_packet_send(const struct hubble_sat_packet_frames *packet)
 {
+	int ret;
+
 	hubble_board_fem_enable();
-	hubble_sat_soc_packet_send(packet);
+	ret = hubble_sat_soc_packet_send(packet);
+	/* Power the PA back down even when TX fails. */
 	hubble_board_fem_sleep();
 
-	return 0;
+	return ret;
 }
