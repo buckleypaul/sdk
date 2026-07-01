@@ -146,9 +146,34 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../satellite/index.html">Satellite Network Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#how-it-works">How It Works</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#packet-generation">Packet Generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#transmission">Transmission</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#pass-prediction">Pass Prediction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#orbital-parameters-satellites-information">Orbital Parameters (Satellites information)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#computing-the-next-pass">Computing the Next Pass</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#common-api-workflow">Common API Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#continuous-transmission">Continuous Transmission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#dual-stack-with-pass-prediction">Dual Stack with Pass Prediction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#transmission-logic">Transmission Logic</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#clock-drift-compensation">Clock Drift Compensation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/index.html#radio-timing">Radio Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#supporting-new-boards">Supporting New Boards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#power-consumption-and-reliability">Power Consumption and Reliability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#configuration-notes">Configuration Notes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../satellite/index.html#api-reference">API Reference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../satellite/api.html">Application APIs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../satellite/api.html#port-apis">Port APIs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../satellite/board-support.html">Supporting New Boards</a></li>
 </ul>
 </li>
 </ul>
@@ -253,6 +278,24 @@ platform.</p>
 <p>On Zephyr, set these in your application’s <code class="docutils literal notranslate"><span class="pre">prj.conf</span></code> file. On other
 platforms, define the equivalent <code class="docutils literal notranslate"><span class="pre">CONFIG_</span></code> macros in your build system or
 project header.</p>
+<div class="kconfig-choice docutils container">
+<p class="rubric">Max compiled-in log level for HubbleNetwork</p>
+<p><em>Choice — select one of:</em></p>
+<dl class="simple kconfig-options">
+<dt><span class="target" id="config-hubble-log-level-off"></span><strong>CONFIG_HUBBLE_LOG_LEVEL_OFF</strong></dt><dd><p><span>Off</span></p>
+</dd>
+<dt><span class="target" id="config-hubble-log-level-err"></span><strong>CONFIG_HUBBLE_LOG_LEVEL_ERR</strong></dt><dd><p><span>Error</span></p>
+</dd>
+<dt><span class="target" id="config-hubble-log-level-wrn"></span><strong>CONFIG_HUBBLE_LOG_LEVEL_WRN</strong></dt><dd><p><span>Warning</span></p>
+</dd>
+<dt><span class="target" id="config-hubble-log-level-inf"></span><strong>CONFIG_HUBBLE_LOG_LEVEL_INF</strong></dt><dd><p><span>Info</span></p>
+</dd>
+<dt><span class="target" id="config-hubble-log-level-dbg"></span><strong>CONFIG_HUBBLE_LOG_LEVEL_DBG</strong></dt><dd><p><span>Debug</span></p>
+</dd>
+<dt><span class="target" id="config-hubble-log-level-default"></span><strong>CONFIG_HUBBLE_LOG_LEVEL_DEFAULT</strong><span> </span><em>[default]</em></dt><dd><p><span>Default</span></p>
+</dd>
+</dl>
+</div>
 <div class="kconfig-choice docutils container">
 <p class="rubric">Counter source</p>
 <p><em>Choice — select one of:</em></p>

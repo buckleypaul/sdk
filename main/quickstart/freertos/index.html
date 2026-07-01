@@ -146,9 +146,34 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../satellite/index.html">Satellite Network Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#how-it-works">How It Works</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#packet-generation">Packet Generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#transmission">Transmission</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#pass-prediction">Pass Prediction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#orbital-parameters-satellites-information">Orbital Parameters (Satellites information)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#computing-the-next-pass">Computing the Next Pass</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#common-api-workflow">Common API Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#continuous-transmission">Continuous Transmission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#dual-stack-with-pass-prediction">Dual Stack with Pass Prediction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#transmission-logic">Transmission Logic</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#clock-drift-compensation">Clock Drift Compensation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/index.html#radio-timing">Radio Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#supporting-new-boards">Supporting New Boards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#power-consumption-and-reliability">Power Consumption and Reliability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#configuration-notes">Configuration Notes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../satellite/index.html#api-reference">API Reference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../satellite/api.html">Application APIs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../satellite/api.html#port-apis">Port APIs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../satellite/board-support.html">Supporting New Boards</a></li>
 </ul>
 </li>
 </ul>
@@ -263,12 +288,9 @@ from the user to adapt it to their specific environment.</p>
 <h2>Adding Hubble Network to FreeRTOS<a class="headerlink" href="#adding-hubble-network-to-freertos" title="Link to this heading"></a></h2>
 <ul>
 <li><p>Include Hubble Network SDK in your application</p>
-<blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>submodule<span class="w"> </span>add<span class="w"> </span>https://github.com/HubbleNetwork/hubble-device-sdk<span class="w"> </span>.
 </pre></div>
 </div>
-<p>git submodule add  <a class="reference external" href="https://github.com/HubbleNetwork/hubble-device-sdk">https://github.com/HubbleNetwork/hubble-device-sdk</a> .</p>
-</div></blockquote>
 </li>
 <li><p>Provide a configuration header</p>
 <blockquote>
